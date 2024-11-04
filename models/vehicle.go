@@ -1,13 +1,15 @@
-package models 
+package models
+
+import "time"
 
 type Vehicle struct {
-    ID int
-    Done chan bool
+	ID          int
+	ParkingTime time.Duration
 }
 
-func NewVehicle(id int) *Vehicle {
-    return &Vehicle{
-        ID:   id,
-        Done: make(chan bool),
-    }
+func NewVehicle(id int, parkingTime time.Duration) *Vehicle {
+	return &Vehicle{
+		ID:          id,
+		ParkingTime: parkingTime,
+	}
 }

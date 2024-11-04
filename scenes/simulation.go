@@ -1,35 +1,40 @@
 package scenes
 
 import (
-    "fmt"
-    "parking_simulator/models"
-    "parking_simulator/utils"
-    "time"
+	"fmt"
+	"parking_simulator/models"
+	"parking_simulator/utils"
+	"time"
 )
 
 func Simulation(parking *models.ParkingLot) {
-    for vehicleID := 1; vehicleID <= 100; vehicleID++ {
-        time.Sleep(utils.RandomArrivalTime())
-        
-        go func(id int) {
-            fmt.Printf("Vehículo %d ha llegado.\n", id)
+	for vehicleID := 1; vehicleID <= 100; vehicleID++ {
+		time.Sleep(utils.RandomArrivalTime())
 
-            if parking.TryEnter(id) {
-                parking.AccessGateEnter(id)
-                fmt.Printf("Vehículo %d accede a la puerta y entra al estacionamiento.\n", id)
-                parking.AccessGateExit(id)
+		parkingTime := utils.RandomParkingDuration()
+		vehicle := models.NewVehicle(vehicleID, parkingTime)
 
-                time.Sleep(utils.RandomParkingDuration())
+		go handleVehicle(parking, vehicle)
+	}
+}
 
-                parking.AccessGateEnter(id)
-                fmt.Printf("Vehículo %d abandonando el estacionamiento.\n", id)
-                parking.Exit(id)
-                parking.AccessGateExit(id)
+func handleVehicle(parking *models.ParkingLot, vehicle *models.Vehicle) {
+	fmt.Printf("Vehículo %d ha llegado.\n", vehicle.ID)
 
-                fmt.Printf("Vehículo %d ha salido del estacionamiento.\n", id)
-            } else {
-                fmt.Printf("Vehículo %d en espera de un lugar disponible.\n", id)
-            }
-        }(vehicleID)
-    }
+	if parking.TryEnter(vehicle) {
+		parking.AccessGateEnter(vehicle.ID)
+		fmt.Printf("Vehículo %d entra al estacionamiento.\n", vehicle.ID)
+		parking.AccessGateExit(vehicle.ID)
+
+		time.Sleep(vehicle.ParkingTime)
+
+		parking.AccessGateEnter(vehicle.ID)
+		fmt.Printf("Vehículo %d abandonando el estacionamiento.\n", vehicle.ID)
+		parking.Exit(vehicle.ID)
+		parking.AccessGateExit(vehicle.ID)
+
+		fmt.Printf("Vehículo %d ha salido del estacionamiento.\n", vehicle.ID)
+	} else {
+		fmt.Printf("Vehículo %d en espera de un lugar disponible.\n", vehicle.ID)
+	}
 }
